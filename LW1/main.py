@@ -63,11 +63,30 @@ def dichotomy_method(f, a, b, eps):
         x2 = (a + b) / 2 + delta
         if f(x1) < f(x2):
             b = x2
-        elif f(x1) > f(x2):
-            a = x1
         else:
-            a, b = x1, x2
-    return a, f(a)
+            a = x1
+    return (a + b) / 2, f((a + b) / 2)
+
+
+def golden_ratio_method(f, a, b, eps):
+    golden_ratio = 0.5 * (3 - 5 ** 0.5)
+    x1 = a + golden_ratio * (b - a)
+    x2 = b - golden_ratio * (b - a)
+    y1 = f(x1)
+    y2 = f(x2)
+    while b - a > eps:
+        # print("a = ", a, "\tx1 =", x1, "\t x2 =", x2, "\tb = ", b)
+        if y1 < y2:
+            b = x2
+            x2, y2 = x1, y1
+            x1 = a + golden_ratio * (b - a)
+            y1 = f(x1)
+        else:
+            a = x1
+            x1, y1 = x2, y2
+            x2 = b - golden_ratio * (b - a)
+            y2 = f(x2)
+    return (a + b) / 2, f((a + b) / 2)
 
 
 def find_all_min():
@@ -78,14 +97,15 @@ def find_all_min():
         [f4, 0, 1, 0.01],
         [f5, 0.5, 2.5, 0.01]
     ]
-    methods = [dichotomy_method]
+    methods = [dichotomy_method, golden_ratio_method]
     for row in functions:
         print("Function: " + str(row[0].__name__))
         for method in methods:
             method_result = method(row[0], row[1], row[2], row[3])
-            real_result = get_min(row[0], row[1], row[2], row[3])
             print(method.__name__ + " result: " + str(method_result))
-            print("Real result: " + str(real_result))
-        print("================")
+        real_result = get_min(row[0], row[1], row[2], row[3])
+        print("real result: " + str(real_result))
+        print("=======================================")
+
 
 find_all_min()
