@@ -89,6 +89,28 @@ def golden_ratio_method(f, a, b, eps):
     return (a + b) / 2, f((a + b) / 2)
 
 
+def parabolic_interpolation_method(f, a, b, eps):
+    x1, x2, x3 = a, (a + b) / 2, b
+    y1, y2, y3 = f(x1), f(x2), f(x3)
+    while x3 - x1 > eps:
+        u = x2 - 0.5 * ((x2 - x1) ** 2 * (y2 - y3) - (x2 - x3) ** 2 * (y2 - y1)) / (
+                (x2 - x1) * (y2 - y3) - (x2 - x3) * (y2 - y1))
+        yu = f(u)
+        if u < x2:
+            if yu < y2:
+                x3, y3 = x2, y2
+                x2, y2 = u, yu
+            else:
+                x1, y1 = u, yu
+        else:
+            if yu < y2:
+                x1, y1 = x2, y2
+                x2, y2 = u, yu
+            else:
+                x3, y3 = u, yu
+    return (x1 + x3) / 2, f((x1 + x3) / 2)
+
+
 def find_all_min():
     functions = [
         [f1, -0.5, 0.5, 0.01],
@@ -97,7 +119,7 @@ def find_all_min():
         [f4, 0, 1, 0.01],
         [f5, 0.5, 2.5, 0.01]
     ]
-    methods = [dichotomy_method, golden_ratio_method]
+    methods = [dichotomy_method, golden_ratio_method, parabolic_interpolation_method]
     for row in functions:
         print("Function: " + str(row[0].__name__))
         for method in methods:
