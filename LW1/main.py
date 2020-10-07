@@ -89,12 +89,16 @@ def golden_ratio_method(f, a, b, eps):
     return (a + b) / 2, f((a + b) / 2)
 
 
+def parabolic_minimum(x1, x2, x3, y1, y2, y3):
+    return x2 - 0.5 * ((x2 - x1) ** 2 * (y2 - y3) - (x2 - x3) ** 2 * (y2 - y1)) / (
+                (x2 - x1) * (y2 - y3) - (x2 - x3) * (y2 - y1))
+
+
 def parabolic_interpolation_method(f, a, b, eps):
     x1, x2, x3 = a, (a + b) / 2, b
     y1, y2, y3 = f(x1), f(x2), f(x3)
     while x3 - x1 > eps:
-        u = x2 - 0.5 * ((x2 - x1) ** 2 * (y2 - y3) - (x2 - x3) ** 2 * (y2 - y1)) / (
-                (x2 - x1) * (y2 - y3) - (x2 - x3) * (y2 - y1))
+        u = parabolic_minimum(x1, x2, x3, y1, y2, y3)
         yu = f(u)
         if u < x2:
             if yu < y2:
@@ -111,6 +115,60 @@ def parabolic_interpolation_method(f, a, b, eps):
     return (x1 + x3) / 2, f((x1 + x3) / 2)
 
 
+def are_values_different(a, b, c):
+    if a == b or a == c or b == c:
+        return False
+    return True
+
+
+def sign(x):
+    if x > 0:
+        return 1
+    elif x < 0:
+        return -1
+    return 0
+
+
+def brent_method(f, a, c, eps):
+    golden_ratio = 0.5 * (3 - 5 ** 0.5)
+    x = w = v = (a + c) / 2
+    yx = yw = yv = f(x)
+    d = e = c - a
+    while c - a > eps:
+        g, e = e, d
+        if are_values_different(x, w, v) and are_values_different(yx, yw, yv):
+            u = parabolic_minimum(w, x, v, yw, yx, yv)
+            if a + eps <= u <= c - eps and abs(u - x) < g / 2:
+                d = abs(u - x)
+        else:
+            if x < (c - a) / 2:
+                u = x + golden_ratio * (c - x)
+                d = c - x
+            else:
+                u = x - golden_ratio * (x - a)
+                d = x - a
+        if abs(u - x) < eps:
+            u = x + sign(u - x) * eps
+        yu = f(u)
+        if yu <= yx:
+            if u >= x:
+                a = x
+            else:
+                c = x
+            v, w, x = w, x, u
+            yv, yw, yx = yw, yx, yu
+        else:
+            if u >= x:
+                c = u
+            else:
+                a = u
+            if yu <= yw or w == x:
+                v, w = w, u
+                yv, yw = yw, yu
+            elif yu <= yv or v == x or v == w:
+                v, u = yv, yu
+
+
 def find_all_min():
     functions = [
         [f1, -0.5, 0.5, 0.01],
@@ -119,7 +177,7 @@ def find_all_min():
         [f4, 0, 1, 0.01],
         [f5, 0.5, 2.5, 0.01]
     ]
-    methods = [dichotomy_method, golden_ratio_method, parabolic_interpolation_method]
+    methods = [dichotomy_method, golden_ratio_method, parabolic_interpolation_method, brent_method]
     for row in functions:
         print("Function: " + str(row[0].__name__))
         for method in methods:
