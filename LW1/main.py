@@ -201,44 +201,77 @@ def fibonachi_method(f, a, b, eps, filename='file.csv', n=20):
         return (l + r) / 2, f((l + r) / 2), i
 
 
-def brent_method(f, a, c, eps):
-    golden_ratio = 0.5 * (3 - 5 ** 0.5)
-    x = w = v = (a + c) / 2
-    yx = yw = yv = f(x)
-    d = e = c - a
-    while c - a > eps:
-        g, e = e, d
-        if are_values_different(x, w, v) and are_values_different(yx, yw, yv):
-            u = parabolic_minimum(w, x, v, yw, yx, yv)
-            if a + eps <= u <= c - eps and abs(u - x) < g / 2:
-                d = abs(u - x)
-        else:
-            if x < (c - a) / 2:
-                u = x + golden_ratio * (c - x)
-                d = c - x
+def brent_method(f, left, right, eps, filename='file.csv'):
+    with open(filename, 'w', newline='') as file:
+
+        coff = (3 - 5 ** 0.5) / 2
+        x = w = v = (left + right) / 2
+        fx = fw = fv = f(x)
+
+        precision = 4
+        writer = csv.writer(file)
+        writer.writerow(['i', 'a', 'c', 'c - a', 'k', 'x', 'w', 'v', 'yX', 'yW', 'yV', 'y1', 'y2'])
+
+        d = e = right - left
+
+        i = 0
+        previous_length = 0
+
+        while right - left > eps:
+
+
+
+            writer.writerow([i, round(left, precision), round(right, precision), round(right - left, precision),
+                             round(previous_length / (right - left), precision), round(x, precision),
+                             round(w, precision), round(v, precision), round(fx, precision), round(fw, precision),
+                             round(fv, precision), round(f(left), precision), round(f(right), precision)])
+
+            i += 1
+            previous_length = right - left
+
+            g, e = e, d
+
+            if are_values_different(x, w, v) and are_values_different(fx, fw, fv):
+
+                u = parabolic_minimum(w, x, v, fw, fx, fv)
+                if left + eps <= u <= right - eps and abs(u - x) < g / 2:
+                    d = abs(u - x)
             else:
-                u = x - golden_ratio * (x - a)
-                d = x - a
-        if abs(u - x) < eps:
-            u = x + sign(u - x) * eps
-        yu = f(u)
-        if yu <= yx:
-            if u >= x:
-                a = x
+
+                if x < (right + left) / 2:
+                    u = x + coff * (right - x)
+                    d = right - x
+                else:
+                    u = x - coff * (x - left)
+                    d = x - left
+
+            if abs(u - x) < eps:
+                u = x + sign(u - x) * eps
+
+            yu = f(u)
+
+            if yu <= fx:
+
+                if u >= x:
+                    left = x
+                else:
+                    right = x
+                v, w, x = w, x, u
+                fv, fw, fx = fw, fx, yu
             else:
-                c = x
-            v, w, x = w, x, u
-            yv, yw, yx = yw, yx, yu
-        else:
-            if u >= x:
-                c = u
-            else:
-                a = u
-            if yu <= yw or w == x:
-                v, w = w, u
-                yv, yw = yw, yu
-            elif yu <= yv or v == x or v == w:
-                v, u = yv, yu
+
+                if u >= x:
+                    right = x
+                else:
+                    left = x
+
+                if yu <= fw or w == x:
+                    v, w = w, u
+                    fv, fw = fw, yu
+                else:
+                    v, u = fv, yu
+
+    return [w, f(w), i]
 
 
 def find_all_min():
