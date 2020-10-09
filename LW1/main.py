@@ -252,7 +252,16 @@ def find_all_min():
         print("=======================================")
 
 
-def build_graph_i_of_ln_eps(function_number, method):
+number_to_color = {
+    1: 'b',
+    2: 'g',
+    3: 'r',
+    4: 'c',
+    5: 'm'
+}
+
+
+def build_graph_i_of_log2_eps(function_number, method):
     functions = [
         [f1, -0.5, 0.5],
         [f2, 6, 9.9],
@@ -261,12 +270,26 @@ def build_graph_i_of_ln_eps(function_number, method):
         [f5, 0.5, 2.5]
     ]
     f = function_number - 1
-    eps_list = [0.00001 * 2 ** j for j in range(15)]
-    ln_eps_list = [log2(eps) for eps in eps_list]
+    eps_list = [0.00001 * 2 ** j for j in range(16)]
+    log2_eps_list = [log2(eps) for eps in eps_list]
+    i_list = []
     for eps in eps_list:
         x, y, i = method(functions[f][0], functions[f][1], functions[f][2], eps)
-        print("eps =", eps, "\ti =", i)
+        if str(method.__name__) == 'dichotomy_method':
+            i *= 2
+        elif str(method.__name__) == 'golden_ratio_method':
+            if i != 0:
+                i += 2
+        elif str(method.__name__) == 'parabolic_interpolation_method':
+            if i != 0:
+                i += 3
+        elif str(method.__name__) == 'brent_method':
+            i += 1
+        i_list.append(i)
+    draw_function(log2_eps_list, i_list, 'log2(eps)', 'i', number_to_color[function_number])
 
 
-find_all_min()
-# build_graph_i_of_ln_eps(1, dichotomy_method)
+# find_all_min()
+for i in [1, 2, 3, 4, 5]:
+    for method in [golden_ratio_method]:
+        build_graph_i_of_log2_eps(i, method)
