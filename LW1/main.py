@@ -168,29 +168,37 @@ def fibonachi(n):
 
 
 def fibonachi_method(f, a, b, eps, filename='file.csv', n=20):
-    def dot(a, b, n, k, is_first):
-        if is_first:
-            return a + (fibonachi(n - k - 1) * (b - a)) / fibonachi(n - k + 1)
-        else:
-            return a + (fibonachi(n - k) * (b - a)) / fibonachi(n - k + 1)
+    with open(filename, 'w', newline='') as file:
+        precision = 4
+        writer = csv.writer(file)
+        writer.writerow(['i', 'a', 'b', 'b - a', 'k', 'x1', 'x2', 'y1', 'y2'])
+        def dot(a, b, n, k, is_first):
+            if is_first:
+                return a + (fibonachi(n - k - 1) * (b - a)) / fibonachi(n - k + 1)
+            else:
+                return a + (fibonachi(n - k) * (b - a)) / fibonachi(n - k + 1)
 
-    l = dot(a, b, n, 1, True)
-    r = dot(a, b, n, 1, False)
-    i = 0
-    for k in range(2, n + 1):
-        i += 1
-        prev = (l, r)
-        if f(l) > f(r):
-            a = l
-            l = r
-            r = dot(a, b, n, k, False)
-        else:
-            b = r
-            r = l
-            l = dot(a, b, n, k, True)
-        if k == n - 2:
-            break
-    return (l + r) / 2, f((l + r) / 2), i
+        l = dot(a, b, n, 1, True)
+        r = dot(a, b, n, 1, False)
+        i = 0
+        previous_length = 0
+        for k in range(2, n + 1):
+            writer.writerow([i, round(a, precision), round(b, precision), round(b - a, precision),
+                            round(previous_length / (b - a), precision), round(l, precision),
+                            round(r, precision), round(f(l), precision), round(f(r), precision)])
+            i += 1
+            previous_length = b - a
+            if f(l) > f(r):
+                a = l
+                l = r
+                r = dot(a, b, n, k, False)
+            else:
+                b = r
+                r = l
+                l = dot(a, b, n, k, True)
+            if k == n - 2:
+                break
+        return (l + r) / 2, f((l + r) / 2), i
 
 
 def brent_method(f, a, c, eps):
