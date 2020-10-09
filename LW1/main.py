@@ -1,5 +1,6 @@
-from math import log10, sin, e
+from math import log10, log2, sin, e
 from matplotlib import pyplot as plt
+import csv
 
 
 def f1(x):
@@ -38,6 +39,7 @@ def draw_function(X, Y, x_name, y_name, color='r'):
     plt.plot(X, Y, color)
     plt.xlabel(x_name)
     plt.ylabel(y_name)
+    plt.grid()
     plt.show()
 
 
@@ -49,44 +51,63 @@ def build_function(function, X, y_name='y', color='r'):
 
 
 def build_functions():
-    build_function(f1, [0.01 * x for x in range(-50, 50)], '1', 'b')
-    build_function(f2, [0.01 * x for x in range(600, 990)], '2', 'g')
-    build_function(f3, [0.01 * x for x in range(0, 628)], '3', 'r')
-    build_function(f4, [0.01 * x for x in range(0, 100)], '4', 'c')
-    build_function(f5, [0.01 * x for x in range(50, 250)], '5', 'm')
+    build_function(f1, [0.01 * x for x in range(-50, 50)], 'y', 'b')
+    build_function(f2, [0.01 * x for x in range(600, 990)], 'y', 'g')
+    build_function(f3, [0.01 * x for x in range(0, 628)], 'y', 'r')
+    build_function(f4, [0.01 * x for x in range(0, 100)], 'y', 'c')
+    build_function(f5, [0.01 * x for x in range(50, 250)], 'y', 'm')
 
 
-def dichotomy_method(f, a, b, eps):
-    delta = 0.49 * eps
-    while b - a > eps:
-        x1 = (a + b) / 2 - delta
-        x2 = (a + b) / 2 + delta
-        if f(x1) < f(x2):
-            b = x2
-        else:
-            a = x1
-    return (a + b) / 2, f((a + b) / 2)
+def dichotomy_method(f, a, b, eps, filename='file.csv'):
+    with open(filename, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['i', 'a', 'b', 'b - a', 'k', 'x1', 'x2', 'y1', 'y2'])
+        delta = 0.49 * eps
+        previous_length = 0
+        i = 0
+        c = 4
+        while b - a > eps:
+            i += 1
+            x1 = (a + b) / 2 - delta
+            x2 = (a + b) / 2 + delta
+            writer.writerow([i, round(a, c), round(b, c), round(b - a, c), round(previous_length / (b - a), c),
+                             round(x1, c), round(x2, c), round(f(x1), c), round(f(x2), c)])
+            previous_length = b - a
+            if f(x1) < f(x2):
+                b = x2
+            else:
+                a = x1
+    return (a + b) / 2, f((a + b) / 2), i
 
 
-def golden_ratio_method(f, a, b, eps):
-    golden_ratio = 0.5 * (3 - 5 ** 0.5)
-    x1 = a + golden_ratio * (b - a)
-    x2 = b - golden_ratio * (b - a)
-    y1 = f(x1)
-    y2 = f(x2)
-    while b - a > eps:
-        # print("a = ", a, "\tx1 =", x1, "\t x2 =", x2, "\tb = ", b)
-        if y1 < y2:
-            b = x2
-            x2, y2 = x1, y1
-            x1 = a + golden_ratio * (b - a)
-            y1 = f(x1)
-        else:
-            a = x1
-            x1, y1 = x2, y2
-            x2 = b - golden_ratio * (b - a)
-            y2 = f(x2)
-    return (a + b) / 2, f((a + b) / 2)
+def golden_ratio_method(f, a, b, eps, filename='file.csv'):
+    with open(filename, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['i', 'a', 'b', 'b - a', 'k', 'x1', 'x2', 'y1', 'y2'])
+        golden_ratio = 0.5 * (3 - 5 ** 0.5)
+        previous_length = 0
+        i = 0
+        c = 4
+        x1 = a + golden_ratio * (b - a)
+        x2 = b - golden_ratio * (b - a)
+        y1 = f(x1)
+        y2 = f(x2)
+        while b - a > eps:
+            i += 1
+            writer.writerow([i, round(a, c), round(b, c), round(b - a, c), round(previous_length / (b - a), c),
+                             round(x1, c), round(x2, c), round(y1, c), round(y2, c)])
+            previous_length = b - a
+            if y1 < y2:
+                b = x2
+                x2, y2 = x1, y1
+                x1 = a + golden_ratio * (b - a)
+                y1 = f(x1)
+            else:
+                a = x1
+                x1, y1 = x2, y2
+                x2 = b - golden_ratio * (b - a)
+                y2 = f(x2)
+        return (a + b) / 2, f((a + b) / 2), i
 
 
 def parabolic_minimum(x1, x2, x3, y1, y2, y3):
@@ -94,25 +115,35 @@ def parabolic_minimum(x1, x2, x3, y1, y2, y3):
                 (x2 - x1) * (y2 - y3) - (x2 - x3) * (y2 - y1))
 
 
-def parabolic_interpolation_method(f, a, b, eps):
-    x1, x2, x3 = a, (a + b) / 2, b
-    y1, y2, y3 = f(x1), f(x2), f(x3)
-    while x3 - x1 > eps:
-        u = parabolic_minimum(x1, x2, x3, y1, y2, y3)
-        yu = f(u)
-        if u < x2:
-            if yu < y2:
-                x3, y3 = x2, y2
-                x2, y2 = u, yu
+def parabolic_interpolation_method(f, a, b, eps, filename='file.csv'):
+    with open(filename, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['i', 'x1', 'x2', 'x3', 'x3 - x1', 'k', 'y1', 'y2', 'y3'])
+        previous_length = 0
+        i = 0
+        c = 4
+        x1, x2, x3 = a, (a + b) / 2, b
+        y1, y2, y3 = f(x1), f(x2), f(x3)
+        while x3 - x1 >= eps:
+            i += 1
+            writer.writerow([i, round(x1, c), round(x2, c), round(x3, c), round(x3 - x1, c), round(previous_length / (x3 - x1), c),
+                             round(y1, c), round(y2, c), round(y3, c)])
+            previous_length = x3 - x1
+            u = parabolic_minimum(x1, x2, x3, y1, y2, y3)
+            yu = f(u)
+            if u < x2:
+                if yu < y2:
+                    x3, y3 = x2, y2
+                    x2, y2 = u, yu
+                else:
+                    x1, y1 = u, yu
             else:
-                x1, y1 = u, yu
-        else:
-            if yu < y2:
-                x1, y1 = x2, y2
-                x2, y2 = u, yu
-            else:
-                x3, y3 = u, yu
-    return (x1 + x3) / 2, f((x1 + x3) / 2)
+                if yu < y2:
+                    x1, y1 = x2, y2
+                    x2, y2 = u, yu
+                else:
+                    x3, y3 = u, yu
+        return (x1 + x3) / 2, f((x1 + x3) / 2), i
 
 
 def are_values_different(a, b, c):
@@ -171,21 +202,38 @@ def brent_method(f, a, c, eps):
 
 def find_all_min():
     functions = [
-        [f1, -0.5, 0.5, 0.01],
-        [f2, 6, 9.9, 0.01],
-        [f3, 0, 6.28, 0.01],
-        [f4, 0, 1, 0.01],
-        [f5, 0.5, 2.5, 0.01]
+        [f1, -0.5, 0.5, 0.05],
+        [f2, 6, 9.9, 1],
+        [f3, 0, 6.28, 0.314],
+        [f4, 0, 1, 0.05],
+        [f5, 0.5, 2.5, 0.1]
     ]
-    methods = [dichotomy_method, golden_ratio_method, parabolic_interpolation_method, brent_method]
+    methods = [parabolic_interpolation_method]
     for row in functions:
         print("Function: " + str(row[0].__name__))
         for method in methods:
-            method_result = method(row[0], row[1], row[2], row[3])
-            print(method.__name__ + " result: " + str(method_result))
+            x, y, i = method(row[0], row[1], row[2], row[3], str(method.__name__) + "_" + str(row[0].__name__) + ".csv")
+            print(method.__name__ + ": x =", x, "\ty =", y, "\ti =")
         real_result = get_min(row[0], row[1], row[2], row[3])
-        print("real result: " + str(real_result))
+        print("real result =", real_result)
         print("=======================================")
 
 
-find_all_min()
+def build_graph_i_of_ln_eps(function_number, method):
+    functions = [
+        [f1, -0.5, 0.5],
+        [f2, 6, 9.9],
+        [f3, 0, 6.28],
+        [f4, 0, 1],
+        [f5, 0.5, 2.5]
+    ]
+    f = function_number - 1
+    eps_list = [0.00001 * 2 ** j for j in range(15)]
+    ln_eps_list = [log2(eps) for eps in eps_list]
+    for eps in eps_list:
+        x, y, i = method(functions[f][0], functions[f][1], functions[f][2], eps)
+        print("eps =", eps, "\ti =", i)
+
+
+# find_all_min()
+build_graph_i_of_ln_eps(1, dichotomy_method)
