@@ -112,7 +112,7 @@ def golden_ratio_method(f, a, b, eps, filename='file.csv'):
 
 def parabolic_minimum(x1, x2, x3, y1, y2, y3):
     return x2 - 0.5 * ((x2 - x1) ** 2 * (y2 - y3) - (x2 - x3) ** 2 * (y2 - y1)) / (
-                (x2 - x1) * (y2 - y3) - (x2 - x3) * (y2 - y1))
+            (x2 - x1) * (y2 - y3) - (x2 - x3) * (y2 - y1))
 
 
 def parabolic_interpolation_method(f, a, b, eps, filename='file.csv'):
@@ -126,8 +126,9 @@ def parabolic_interpolation_method(f, a, b, eps, filename='file.csv'):
         y1, y2, y3 = f(x1), f(x2), f(x3)
         while x3 - x1 >= eps:
             i += 1
-            writer.writerow([i, round(x1, c), round(x2, c), round(x3, c), round(x3 - x1, c), round(previous_length / (x3 - x1), c),
-                             round(y1, c), round(y2, c), round(y3, c)])
+            writer.writerow(
+                [i, round(x1, c), round(x2, c), round(x3, c), round(x3 - x1, c), round(previous_length / (x3 - x1), c),
+                 round(y1, c), round(y2, c), round(y3, c)])
             previous_length = x3 - x1
             u = parabolic_minimum(x1, x2, x3, y1, y2, y3)
             yu = f(u)
@@ -159,20 +160,25 @@ def sign(x):
         return -1
     return 0
 
+
 def fibonachi(n):
     if n in (1, 2):
         return 1
     return fibonachi(n - 1) + fibonachi(n - 2)
 
-def fibonachi_method(f, a, b, eps, n=20):
+
+def fibonachi_method(f, a, b, eps, filename='file.csv', n=20):
     def dot(a, b, n, k, is_first):
         if is_first:
-            return a + (fibonachi(n-k-1) * (b - a)) / fibonachi(n-k+1)
+            return a + (fibonachi(n - k - 1) * (b - a)) / fibonachi(n - k + 1)
         else:
-            return a + (fibonachi(n-k) * (b - a)) / fibonachi(n-k+1)
+            return a + (fibonachi(n - k) * (b - a)) / fibonachi(n - k + 1)
+
     l = dot(a, b, n, 1, True)
     r = dot(a, b, n, 1, False)
-    for k in range(2, n+1):
+    i = 0
+    for k in range(2, n + 1):
+        i += 1
         prev = (l, r)
         if f(l) > f(r):
             a = l
@@ -184,7 +190,7 @@ def fibonachi_method(f, a, b, eps, n=20):
             l = dot(a, b, n, k, True)
         if k == n - 2:
             break
-    return (l + r) / 2, f((l + r) / 2)
+    return (l + r) / 2, f((l + r) / 2), i
 
 
 def brent_method(f, a, c, eps):
@@ -235,12 +241,12 @@ def find_all_min():
         [f4, 0, 1, 0.05],
         [f5, 0.5, 2.5, 0.1]
     ]
-    methods = [dichotomy_method, golden_ratio_method, parabolic_interpolation_method, fibonachi_method]#, brent_method]
+    methods = [fibonachi_method]
     for row in functions:
         print("Function: " + str(row[0].__name__))
         for method in methods:
             x, y, i = method(row[0], row[1], row[2], row[3], str(method.__name__) + "_" + str(row[0].__name__) + ".csv")
-            print(method.__name__ + ": x =", x, "\ty =", y, "\ti =")
+            print(method.__name__ + ": x =", x, "\ty =", y, "\ti =", i)
         real_result = get_min(row[0], row[1], row[2], row[3])
         print("real result =", real_result)
         print("=======================================")
@@ -262,5 +268,5 @@ def build_graph_i_of_ln_eps(function_number, method):
         print("eps =", eps, "\ti =", i)
 
 
-# find_all_min()
-build_graph_i_of_ln_eps(1, dichotomy_method)
+find_all_min()
+# build_graph_i_of_ln_eps(1, dichotomy_method)
