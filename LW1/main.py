@@ -183,10 +183,10 @@ def fibonachi_method(f, a, b, eps, filename='file.csv', n=20):
         i = 0
         previous_length = 0
         for k in range(2, n + 1):
+            i += 1
             writer.writerow([i, round(a, precision), round(b, precision), round(b - a, precision),
                             round(previous_length / (b - a), precision), round(l, precision),
                             round(r, precision), round(f(l), precision), round(f(r), precision)])
-            i += 1
             previous_length = b - a
             if f(l) > f(r):
                 a = l
