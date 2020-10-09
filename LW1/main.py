@@ -159,6 +159,33 @@ def sign(x):
         return -1
     return 0
 
+def fibonachi(n):
+    if n in (1, 2):
+        return 1
+    return fibonachi(n - 1) + fibonachi(n - 2)
+
+def fibonachi_method(f, a, b, eps, n=20):
+    def dot(a, b, n, k, is_first):
+        if is_first:
+            return a + (fibonachi(n-k-1) * (b - a)) / fibonachi(n-k+1)
+        else:
+            return a + (fibonachi(n-k) * (b - a)) / fibonachi(n-k+1)
+    l = dot(a, b, n, 1, True)
+    r = dot(a, b, n, 1, False)
+    for k in range(2, n+1):
+        prev = (l, r)
+        if f(l) > f(r):
+            a = l
+            l = r
+            r = dot(a, b, n, k, False)
+        else:
+            b = r
+            r = l
+            l = dot(a, b, n, k, True)
+        if k == n - 2:
+            break
+    return (l + r) / 2, f((l + r) / 2)
+
 
 def brent_method(f, a, c, eps):
     golden_ratio = 0.5 * (3 - 5 ** 0.5)
@@ -208,7 +235,7 @@ def find_all_min():
         [f4, 0, 1, 0.05],
         [f5, 0.5, 2.5, 0.1]
     ]
-    methods = [parabolic_interpolation_method]
+    methods = [dichotomy_method, golden_ratio_method, parabolic_interpolation_method, fibonachi_method]#, brent_method]
     for row in functions:
         print("Function: " + str(row[0].__name__))
         for method in methods:
