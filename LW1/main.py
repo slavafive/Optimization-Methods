@@ -167,6 +167,30 @@ def fibonachi(n):
     return fibonachi(n - 1) + fibonachi(n - 2)
 
 
+def fibonachi_iterative(n):
+    if n in (1, 2):
+        return 1
+    fib = [1, 1]
+    i = 1
+    while True:
+        i += 1
+        fib.append(fib[i - 1] + fib[i - 2])
+        if i + 1 == n:
+            return fib[i]
+
+
+def find_first_index_of_fibonachi_number(value):
+    if value == 1:
+        return 3
+    fib = [1, 1]
+    i = 1
+    while True:
+        i += 1
+        fib.append(fib[i - 1] + fib[i - 2])
+        if fib[i] > value:
+            return i + 1
+
+
 def fibonachi_method(f, a, b, eps, filename='file.csv', n=20):
     with open(filename, 'w', newline='') as file:
         precision = 4
@@ -210,7 +234,7 @@ def brent_method(f, left, right, eps, filename='file.csv'):
 
         precision = 4
         writer = csv.writer(file)
-        writer.writerow(['i', 'a', 'c', 'c - a', 'k', 'x', 'w', 'v', 'yX', 'yW', 'yV', 'y1', 'y2'])
+        writer.writerow(['i', 'a', 'c', 'c - a', 'k', 'x', 'w', 'v', 'yx', 'yw', 'yv', 'y1', 'y2'])
 
         d = e = right - left
 
@@ -219,14 +243,13 @@ def brent_method(f, left, right, eps, filename='file.csv'):
 
         while right - left > eps:
 
-
+            i += 1
 
             writer.writerow([i, round(left, precision), round(right, precision), round(right - left, precision),
                              round(previous_length / (right - left), precision), round(x, precision),
                              round(w, precision), round(v, precision), round(fx, precision), round(fw, precision),
                              round(fv, precision), round(f(left), precision), round(f(right), precision)])
 
-            i += 1
             previous_length = right - left
 
             g, e = e, d
@@ -271,18 +294,18 @@ def brent_method(f, left, right, eps, filename='file.csv'):
                 else:
                     v, u = fv, yu
 
-    return [w, f(w), i]
+    return w, f(w), i
 
 
 def find_all_min():
     functions = [
-        [f1, -0.5, 0.5, 0.05],
-        [f2, 6, 9.9, 1],
-        [f3, 0, 6.28, 0.314],
-        [f4, 0, 1, 0.05],
-        [f5, 0.5, 2.5, 0.1]
+        [f1, -0.5, 0.5, 0.01],
+        [f2, 6, 9.9, 0.01],
+        [f3, 0, 6.28, 0.01],
+        [f4, 0, 1, 0.01],
+        [f5, 0.5, 2.5, 0.01]
     ]
-    methods = [fibonachi_method]
+    methods = [fibonachi_method, brent_method]
     for row in functions:
         print("Function: " + str(row[0].__name__))
         for method in methods:
@@ -314,23 +337,27 @@ def build_graph_i_of_log2_eps(function_number, method):
     eps_list = [0.00001 * 2 ** j for j in range(16)]
     log2_eps_list = [log2(eps) for eps in eps_list]
     i_list = []
-    for eps in eps_list:
-        x, y, i = method(functions[f][0], functions[f][1], functions[f][2], eps)
-        if str(method.__name__) == 'dichotomy_method':
-            i *= 2
-        elif str(method.__name__) == 'golden_ratio_method':
-            if i != 0:
-                i += 2
-        elif str(method.__name__) == 'parabolic_interpolation_method':
-            if i != 0:
-                i += 3
-        elif str(method.__name__) == 'brent_method':
-            i += 1
-        i_list.append(i)
+    if str(method.__name__) == 'fibonachi_method':
+        for eps in eps_list:
+            i_list.append(find_first_index_of_fibonachi_number((functions[f][2] - functions[f][1]) / eps - 1))
+    else:
+        for eps in eps_list:
+            x, y, i = method(functions[f][0], functions[f][1], functions[f][2], eps)
+            if str(method.__name__) == 'dichotomy_method':
+                i *= 2
+            elif str(method.__name__) == 'golden_ratio_method':
+                if i != 0:
+                    i += 2
+            elif str(method.__name__) == 'parabolic_interpolation_method':
+                if i != 0:
+                    i += 3
+            elif str(method.__name__) == 'brent_method':
+                i += 1
+            i_list.append(i)
     draw_function(log2_eps_list, i_list, 'log2(eps)', 'i', number_to_color[function_number])
 
 
 # find_all_min()
 for i in [1, 2, 3, 4, 5]:
-    for method in [golden_ratio_method]:
+    for method in [fibonachi_method]:
         build_graph_i_of_log2_eps(i, method)
