@@ -42,7 +42,7 @@ def f4(x1, x2, x3, x4):
 
 
 def f4_derivative_x1(x1, x2, x3, x4):
-    return 2 * (20 * (x1 - x4)^3 + x1 + x2)
+    return 2 * (20 * (x1 - x4) ** 3 + x1 + x2)
 
 
 def f4_derivative_x2(x1, x2, x3, x4):
@@ -87,13 +87,25 @@ derivatives = {
 }
 
 
-def coordinate_descent_method():
-    pass
+def coordinate_descent_method(f, eps):
+    arguments = f.__code__.co_argcount
+    x = initialise_arguments(arguments)
+    iterations = 0
+    while iterations < 1000:
+        iterations += 1
+        alpha = 1e-6
+        x_prev = x.copy()
+        rnd = iterations % arguments
+        x[rnd] = x[rnd] - alpha * derivatives[f][rnd](*x_prev)
+        print("iteration =", iterations, "\t x =", x)
+    return x
 
 
 def brent_method():
     pass
 
 
-x = steepest_descent_method(f1, 0.1)
+# x = steepest_descent_method(f1, 0.1)
+x = coordinate_descent_method(f3, 0.1)
+
 print(x)
