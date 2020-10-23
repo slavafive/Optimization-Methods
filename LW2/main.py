@@ -19,11 +19,11 @@ def f2(x1, x2):
 
 
 def f2_derivative_x1(x1, x2):
-    pass
+    return 2 * (2 * x1 ** 3 - 2 * x1 * x2 + x1 - 1)
 
 
 def f2_derivative_x2(x1, x2):
-    pass
+    return 2 * (x2 - x1 ** 2)
 
 
 def f3(x1, x2):
@@ -31,11 +31,11 @@ def f3(x1, x2):
 
 
 def f3_derivative_x1(x1, x2):
-    pass
+    return 2 * x1 * (x2 ** 6 + x2 ** 4 - 2 * x2 ** 3 - x2 ** 2 - 2 * x2 + 3) + 5.25 * x2 ** 3 + 4.5 * x2 ** 2 + 3 * x2 - 12.75
 
 
 def f3_derivative_x2(x1, x2):
-    pass
+    return x1 * (x1 * (6 * x2 ** 5 + 4 * x2 ** 3 - 6 * x2 ** 2 - 2 * x2 - 2) + 15.75 * x2 ** 2 + 9 * x2 + 3)
 
 
 def f4(x1, x2, x3, x4):
@@ -43,19 +43,19 @@ def f4(x1, x2, x3, x4):
 
 
 def f4_derivative_x1(x1, x2, x3, x4):
-    pass
+    return 2 * (20 * (x1 - x4)^3 + x1 + x2)
 
 
 def f4_derivative_x2(x1, x2, x3, x4):
-    pass
+    return 2 * (x1 + 2 * (x2 - 2 * x3)^3 + x2)
 
 
 def f4_derivative_x3(x1, x2, x3, x4):
-    pass
+    return 10 * (x3 - x4) - 8 * (x2 - 2 * x3) ** 3
 
 
 def f4_derivative_x4(x1, x2, x3, x4):
-    pass
+    return 10 * (-4 * (x1 - x4) ** 3 + x4 - x3)
 
 
 def does_converge(a, b, eps):
