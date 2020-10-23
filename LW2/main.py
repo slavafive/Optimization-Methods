@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 
 def f1(x1, x2):
@@ -62,16 +63,17 @@ def does_converge(a, b, eps):
 
 
 def initialise_arguments(arguments):
-    return np.array([5, 4])
+    return np.array([random.randint(-50, 50) for i in range(arguments)])
 
 
-def steepest_descent_method(f, eps):
+def steepest_descent_method(f, eps, iteration_limit=1000):
     arguments = f.__code__.co_argcount
     x = initialise_arguments(arguments)
+    x_prev = None
     iterations = 0
-    while iterations < 1000:
+    while (x_prev is None or not does_converge(x, x_prev, eps)) and iterations < iteration_limit:
         iterations += 1
-        alpha = 1e-6
+        alpha = 1e-4 / iterations
         x_prev = x.copy()
         for i in range(arguments):
             x[i] = x[i] - alpha * derivatives[f][i](*x_prev)
