@@ -43,7 +43,7 @@ def f4(x1, x2, x3, x4):
 
 
 def f4_derivative_x1(x1, x2, x3, x4):
-    return 2 * (20 * (x1 - x4)^3 + x1 + x2)
+    return 2 * (20 * (x1 - x4) ** 3 + x1 + x2)
 
 
 def f4_derivative_x2(x1, x2, x3, x4):
@@ -63,7 +63,7 @@ def does_converge(a, b, eps):
 
 
 def initialise_arguments(arguments):
-    return np.array([random.randint(-200, 200) for i in range(arguments)])
+    return np.array([random.randint(-50, 50) for i in range(arguments)])
 
 
 def steepest_descent_method(f, eps, iteration_limit=1000):
@@ -73,7 +73,7 @@ def steepest_descent_method(f, eps, iteration_limit=1000):
     iterations = 0
     while (x_prev is None or not does_converge(x, x_prev, eps)) and iterations < iteration_limit:
         iterations += 1
-        alpha = 1e-7
+        alpha = 1e-4 / iterations
         x_prev = x.copy()
         for i in range(arguments):
             x[i] = x[i] - alpha * derivatives[f][i](*x_prev)
@@ -97,5 +97,5 @@ def brent_method():
     pass
 
 
-x = steepest_descent_method(f1, eps=0.1, iteration_limit=500)
+x = steepest_descent_method(f3, eps=0.001, iteration_limit=1000)
 print(x)
