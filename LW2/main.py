@@ -47,7 +47,7 @@ def f4_derivative_x1(x1, x2, x3, x4):
 
 
 def f4_derivative_x2(x1, x2, x3, x4):
-    return 2 * (x1 + 2 * (x2 - 2 * x3)^3 + x2)
+    return 2 * (x1 + 2 * (x2 - 2 * x3) ** 3 + x2)
 
 
 def f4_derivative_x3(x1, x2, x3, x4):
@@ -66,6 +66,29 @@ def initialise_arguments(arguments):
     return np.array([random.randint(-50, 50) for i in range(arguments)])
 
 
+derivatives = {
+    f1: [f1_derivative_x1, f1_derivative_x2],
+    f2: [f2_derivative_x1, f2_derivative_x2],
+    f3: [f3_derivative_x1, f3_derivative_x2],
+    f4: [f4_derivative_x1, f4_derivative_x2, f4_derivative_x3, f4_derivative_x4]
+}
+
+
+def coordinate_descent_method(f, eps, iteration_limit=1000):
+    arguments = f.__code__.co_argcount
+    x = initialise_arguments(arguments)
+    x_prev = None
+    iterations = 0
+    while (x_prev is None or not does_converge(x, x_prev, eps)) and iterations < iteration_limit:
+        iterations += 1
+        alpha = 1e-5 / iterations
+        x_prev = x.copy()
+        rnd = iterations % arguments
+        x[rnd] = x[rnd] - alpha * derivatives[f][rnd](*x_prev)
+        print("iteration =", iterations, "\t x =", x)
+    return x
+
+
 def steepest_descent_method(f, eps, iteration_limit=1000):
     arguments = f.__code__.co_argcount
     x = initialise_arguments(arguments)
@@ -81,33 +104,11 @@ def steepest_descent_method(f, eps, iteration_limit=1000):
     return x
 
 
-derivatives = {
-    f1: [f1_derivative_x1, f1_derivative_x2],
-    f2: [f2_derivative_x1, f2_derivative_x2],
-    f3: [f3_derivative_x1, f3_derivative_x2],
-    f4: [f4_derivative_x1, f4_derivative_x2, f4_derivative_x3, f4_derivative_x4]
-}
-
-
-def coordinate_descent_method(f, eps):
-    arguments = f.__code__.co_argcount
-    x = initialise_arguments(arguments)
-    iterations = 0
-    while iterations < 1000:
-        iterations += 1
-        alpha = 1e-6
-        x_prev = x.copy()
-        rnd = iterations % arguments
-        x[rnd] = x[rnd] - alpha * derivatives[f][rnd](*x_prev)
-        print("iteration =", iterations, "\t x =", x)
-    return x
-
-
 def brent_method():
     pass
 
 
 # x = steepest_descent_method(f1, 0.1)
-x = coordinate_descent_method(f3, 0.1)
+x = coordinate_descent_method(f1, 0.1)
 
 print(x)
