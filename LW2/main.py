@@ -1,5 +1,6 @@
 import numpy as np
 import random
+from matplotlib import pyplot as plt
 
 
 def f1(x1, x2):
@@ -62,8 +63,15 @@ def does_converge(a, b, eps):
     return np.linalg.norm(np.subtract(a, b)) < eps
 
 
-def initialise_arguments(arguments):
-    return np.array([random.randint(-50, 50) for i in range(arguments)])
+def initialise_arguments(f):
+    if f == f1:
+        return np.array([-1.0, -1.0])
+    elif f == f2:
+        return np.array([-1.0, -1.0])
+    elif f == f3:
+        return np.array([-1.0, -1.0])
+    elif f == f4:
+        return np.array([-3.0, -3.0, -3.0, -3.0])
 
 
 derivatives = {
@@ -74,41 +82,76 @@ derivatives = {
 }
 
 
-def coordinate_descent_method(f, eps, iteration_limit=1000):
+def coordinate_descent_method(f, eps=10 ** -4, norm=0):
     arguments = f.__code__.co_argcount
-    x = initialise_arguments(arguments)
+    if norm == 0:
+        x = initialise_arguments(f)
+    else:
+        if arguments == 2:
+            x = np.full(arguments, norm / 2 ** 0.5)
+        elif arguments == 4:
+            x = np.full(arguments, norm / 2)
     x_prev = None
     iterations = 0
-    while (x_prev is None or not does_converge(x, x_prev, eps)) and iterations < iteration_limit:
+    while (x_prev is None or not does_converge(x, x_prev, eps)):
         iterations += 1
-        alpha = 1e-5 / iterations
+        alpha = 0.001
         x_prev = x.copy()
         rnd = iterations % arguments
         x[rnd] = x[rnd] - alpha * derivatives[f][rnd](*x_prev)
         print("iteration =", iterations, "\t x =", x)
-    return x
+    return x, iterations
 
 
-def steepest_descent_method(f, eps, iteration_limit=1000):
+def steepest_descent_method(f, eps=10 ** -4, norm=0):
     arguments = f.__code__.co_argcount
-    x = initialise_arguments(arguments)
+    if norm == 0:
+        x = initialise_arguments(f)
+    else:
+        if arguments == 2:
+            x = np.full(arguments, norm / 2 ** 0.5)
+        elif arguments == 4:
+            x = np.full(arguments, norm / 2)
     x_prev = None
     iterations = 0
-    while (x_prev is None or not does_converge(x, x_prev, eps)) and iterations < iteration_limit:
+    while (x_prev is None or not does_converge(x, x_prev, eps)):
         iterations += 1
-        alpha = 1e-4 / iterations
+        alpha = 0.001
         x_prev = x.copy()
         for i in range(arguments):
             x[i] = x[i] - alpha * derivatives[f][i](*x_prev)
         print("iteration =", iterations, "\t x =", x)
-    return x
+    return x, iterations
+
+
+def build_graph_from_eps(method, f):
+    eps_values = [10 ** i for i in range(-7, 1)]
+    iterations_values = []
+    for eps in eps_values:
+        x, iterations = method(f, eps=eps)
+        iterations_values.append(iterations)
+    plt.plot(eps_values, iterations_values, 'b')
+    plt.xlabel("eps")
+    plt.ylabel("iterations")
+    plt.xscale('log')
+    plt.show()
+
+
+def build_graph_from_norm(method, f):
+    norm_values = [0.25 * i for i in range(13)]
+    iterations_values = []
+    for norm in norm_values:
+        x, iterations = method(f, norm=norm)
+        iterations_values.append(iterations)
+    plt.plot(norm_values, iterations_values, '#B124E5')
+    plt.xlabel("norm")
+    plt.ylabel("iterations")
+    plt.show()
 
 
 def brent_method():
     pass
 
 
-# x = steepest_descent_method(f1, 0.1)
-x = coordinate_descent_method(f1, 0.1)
-
-print(x)
+# build_graph_from_eps(coordinate_descent_method, f4)
+build_graph_from_norm(coordinate_descent_method, f4)
