@@ -306,7 +306,6 @@ def build_graph_from_norm(method, f):
     plt.ylabel("iterations")
     plt.show()
 
-
 # build_graph_from_eps(coordinate_descent_method, f4)
 # build_graph_from_norm(coordinate_descent_method, f4)
 # build_graph_for_brent_method(f9, f9_derivative, 0.5, 2.5)
